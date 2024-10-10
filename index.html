@@ -1,0 +1,121 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+
+    <py-env>
+        - plotly
+        - numpy
+    </py-env>
+</head>
+
+<body>
+
+<div class="row">
+<div id="my_chart"></div>
+</div>
+
+<script type='text/javascript'>
+        function plot(graph, chart) {
+            var figure = JSON.parse(graph)
+            Plotly.newPlot(chart, figure, {});
+        }
+</script>
+
+<py-script>
+import js
+import json
+import plotly
+import plotly.graph_objects as go
+import numpy as np
+
+import plotly.graph_objects as go
+import numpy as np
+
+a=0.6;
+
+def fx(t,x,y,z):
+  return (z-0.7)*x-3.5*y
+def fy(t,x,y,z):
+  return 3.5*x+(z-0.7)*y
+def fz(t,x,y,z):
+  return 0.6+z-z**3/3-(x*x+y*y)*(1+0.25*z)
+		
+x=1;
+y=1;
+z=1;
+  
+dt = 0.02;
+t=0;
+
+nn=0
+nstep=10000
+
+xs=np.empty(nstep+1)
+ys=np.empty(nstep+1)
+zs=np.empty(nstep+1)
+
+while True:
+
+  nn=nn+1
+  if nn > nstep:
+    break
+  t=t+dt
+  wwx=x
+  wwy=y
+  wwz=z
+  k0x=dt*fx(t,wwx,wwy,wwz)
+  k0y=dt*fy(t,wwx,wwy,wwz)
+  k0z=dt*fz(t,wwx,wwy,wwz)
+
+  wwx=x+k0x/2  
+  wwy=y+k0y/2
+  wwz=z+k0z/2
+  k1x=dt*fx(t+dt/2,wwx,wwy,wwz)
+  k1y=dt*fy(t+dt/2,wwx,wwy,wwz)
+  k1z=dt*fz(t+dt/2,wwx,wwy,wwz)
+
+  wwx=x+k1x/2
+  wwy=y+k1y/2
+  wwz=z+k1z/2
+  k2x=dt*fx(t+dt/2,wwx,wwy,wwz)
+  k2y=dt*fy(t+dt/2,wwx,wwy,wwz)
+  k2z=dt*fz(t+dt/2,wwx,wwy,wwz)
+
+  wwx=x+k2x/2
+  wwy=y+k2y/2
+  wwz=z+k2z/2
+  k3x=dt*fx(t+dt,wwx,wwy,wwz)
+  k3y=dt*fy(t+dt,wwx,wwy,wwz)
+  k3z=dt*fz(t+dt,wwx,wwy,wwz)
+
+  x=x+(k0x+2*k1x+2*k2x+k3x)/6
+  y=y+(k0y+2*k1y+2*k2y+k3y)/6
+  z=z+(k0z+2*k1z+2*k2z+k3z)/6
+
+  xs[nn]=x
+  ys[nn]=y
+  zs[nn]=z
+	
+
+
+# Create the 3D plot
+fig = go.Figure(data=[go.Scatter3d(x=xs, y=ys, z=zs, mode='lines',line=dict(width=7))])
+
+fig.update_layout(
+autosize=False,
+width=800,
+height=800
+)
+
+# Show the plot
+fig.show()
+
+graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+js.plot(graphJSON,"my_chart")
+
+</py-script>
+</body>
+</html>
